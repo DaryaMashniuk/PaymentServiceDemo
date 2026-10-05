@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: 02-create-transactions-table
+      author: darya
+      changes:
+        - createTable:
+            tableName: transactions
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_from
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_to
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency_shortname
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sum
+                  type: NUMERIC(18,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expense_category
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: datetime
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sum_usd
+                  type: NUMERIC(18,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: limit_exceeded
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false

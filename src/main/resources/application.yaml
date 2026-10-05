@@ -21,13 +21,12 @@ spring:
             time_zone: UTC
 
     liquibase:
-      change-log: classpath:db/changelog/db.changelog-master.xml
-      enabled: false
+      change-log: classpath:db/changelog/db.changelog-master.yaml
 
     data:
       redis:
         host: ${REDIS_HOST:localhost}
         port: ${REDIS_PORT:6379}
 
-  app:
-    zone-id: Europe/Minsk
+app:
+  zone-id: Europe/Minsk

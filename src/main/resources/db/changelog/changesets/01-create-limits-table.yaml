@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01-create-limits-table
+      author: darya
+      changes:
+        - createTable:
+            tableName: limits
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_from
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: limit_sum
+                  type: NUMERIC(18,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: limit_datetime
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: limit_currency_shortname
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expense_category
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false

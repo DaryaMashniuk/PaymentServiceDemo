@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 04-add-indexes
+      author: darya
+      changes:
+        - createIndex:
+            indexName: idx_transactions_acc_cat_date
+            tableName: transactions
+            columns:
+              - column:
+                  name: account_from
+              - column:
+                  name: expense_category
+              - column:
+                  name: datetime
+        - createIndex:
+            indexName: idx_limits_acc_cat_date
+            tableName: limits
+            columns:
+              - column:
+                  name: account_from
+              - column:
+                  name: expense_category
+              - column:
+                  name: limit_datetime

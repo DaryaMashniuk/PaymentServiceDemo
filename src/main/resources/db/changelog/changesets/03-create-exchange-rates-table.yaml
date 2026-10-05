@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 03-create-exchange-rates-table
+      author: darya
+      changes:
+        - createTable:
+            tableName: exchange_rates
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rate_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency_pair
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: close_rate
+                  type: NUMERIC(18,8)
+              - column:
+                  name: previous_close_rate
+                  type: NUMERIC(18,8)
+        - addUniqueConstraint:
+            tableName: exchange_rates
+            columnNames: currency_pair, rate_date
+            constraintName: uk_exchange_rates_pair_date

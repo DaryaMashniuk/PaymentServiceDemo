@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changesets/01-create-limits-table.yaml
+  - include:
+      file: db/changelog/changesets/02-create-transactions-table.yaml
+  - include:
+      file: db/changelog/changesets/03-create-exchange-rates-table.yaml
+  - include:
+      file: db/changelog/changesets/04-add-indexes.yaml
+  - include:
+      file: db/changelog/changesets/05-create-monthly-spending-table.yaml

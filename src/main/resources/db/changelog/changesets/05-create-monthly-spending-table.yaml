@@ -1,0 +1,81 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 05-create-monthly-spending-table
+      author: darya
+
+      changes:
+
+        - createTable:
+            tableName: monthly_spending
+
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: account_from
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: expense_category
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: month_start
+                  type: DATE
+                  constraints:
+                    nullable: false
+                  remarks: >
+                    First day of month calculated in Asia/Almaty timezone.
+
+              - column:
+                  name: limit_sum
+                  type: NUMERIC(18,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: spent_usd
+                  type: NUMERIC(18,2)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: limit_exceeded
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: monthly_spending
+            columnNames: account_from, expense_category, month_start
+            constraintName: uk_monthly_spending_acc_cat_month
+
+        - createIndex:
+            tableName: monthly_spending
+            indexName: idx_monthly_spending_acc_month
+            columns:
+              - column:
+                  name: account_from
+
+              - column:
+                  name: month_start

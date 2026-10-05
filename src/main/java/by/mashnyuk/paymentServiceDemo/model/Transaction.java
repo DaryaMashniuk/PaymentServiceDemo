@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction {
@@ -93,6 +95,7 @@ public class Transaction {
     )
     private BigDecimal sumUsd;
 
+    @Builder.Default
     @Column(
             name = "limit_exceeded",
             nullable = false

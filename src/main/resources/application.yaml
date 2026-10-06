@@ -28,5 +28,55 @@ spring:
         host: ${REDIS_HOST:localhost}
         port: ${REDIS_PORT:6379}
 
+exchange-rate:
+  client:
+    base-url: ${EXCHANGE_RATE_API_URL:https://api.twelvedata.com}
+    api-key: ${EXCHANGE_RATE_API_KEY}
+    connect-timeout: 2s
+    read-timeout: 3s
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      exchangeRateApi:
+        register-health-indicator: true
+
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+
+        minimum-number-of-calls: 5
+
+        failure-rate-threshold: 50
+
+        wait-duration-in-open-state: 30s
+
+        permitted-number-of-calls-in-half-open-state: 2
+
+        automatic-transition-from-open-to-half-open-enabled: true
+
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.RestClientException
+          - by.mashnyuk.paymentServiceDemo.exception.ExchangeRateClientException
+
 app:
   zone-id: Europe/Minsk
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+
+  endpoint:
+    health:
+      show-details: always
+
+  metrics:
+    tags:
+      application: payment-service-demo

@@ -100,14 +100,6 @@ public class MonthlySpending {
     )
     private Boolean limitExceeded = false;
 
-    @Version
-    @Column(
-            name = "version",
-            nullable = false
-    )
-    @Builder.Default
-    private Long version = 0L;
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) {

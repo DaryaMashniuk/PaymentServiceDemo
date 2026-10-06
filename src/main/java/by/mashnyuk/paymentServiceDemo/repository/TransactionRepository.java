@@ -33,5 +33,7 @@ public interface TransactionRepository
             OffsetDateTime to
     );
 
+    List<Transaction> findAllByAccountFromAndLimitExceededTrue(String accountFrom);
+
     List<Transaction> findAllByLimitExceededTrue();
 }

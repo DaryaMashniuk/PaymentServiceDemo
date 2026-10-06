@@ -1,5 +1,6 @@
 package by.mashnyuk.paymentServiceDemo.service;
 
+import by.mashnyuk.paymentServiceDemo.AbstractIntegrationTest;
 import by.mashnyuk.paymentServiceDemo.client.ExchangeRateClient;
 import by.mashnyuk.paymentServiceDemo.config.ExchangeRateMetrics;
 import by.mashnyuk.paymentServiceDemo.exception.ExchangeRateClientException;
@@ -105,7 +106,7 @@ class ExchangeRateExternalServiceTest {
     @DisplayName("Circuit Breaker Aspect Tests")
     @ExtendWith(SpringExtension.class)
     @SpringBootTest
-    class CircuitBreakerTests {
+    class CircuitBreakerTests  extends AbstractIntegrationTest {
 
         @MockitoBean
         private ExchangeRateClient exchangeRateClient;

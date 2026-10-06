@@ -125,16 +125,16 @@ class Case1E2ETest extends AbstractIntegrationTest {
         assertThat(exceeded).isNotNull().hasSize(2);
 
         ExceededTransactionResponseDto txJan3 = exceeded.get(0);
-        assertThat(txJan3.getSum()).isEqualByComparingTo("600.00");
-        assertThat(txJan3.getDatetime()).isEqualTo(OffsetDateTime.parse("2022-01-03T12:00:00Z"));
-        assertThat(txJan3.getLimitSum()).isEqualByComparingTo("1000.00");
-        assertThat(txJan3.getLimitDatetime()).isEqualTo(OffsetDateTime.parse("2022-01-01T00:00:00Z"));
+        assertThat(txJan3.sum()).isEqualByComparingTo("600.00");
+        assertThat(txJan3.datetime()).isEqualTo(OffsetDateTime.parse("2022-01-03T12:00:00Z"));
+        assertThat(txJan3.limitSum()).isEqualByComparingTo("1000.00");
+        assertThat(txJan3.limitDatetime()).isEqualTo(OffsetDateTime.parse("2022-01-01T00:00:00Z"));
 
         ExceededTransactionResponseDto txJan13 = exceeded.get(1);
-        assertThat(txJan13.getSum()).isEqualByComparingTo("100.00");
-        assertThat(txJan13.getDatetime()).isEqualTo(OffsetDateTime.parse("2022-01-13T15:00:00Z"));
-        assertThat(txJan13.getLimitSum()).isEqualByComparingTo("2000.00");
-        assertThat(txJan13.getLimitDatetime()).isEqualTo(OffsetDateTime.parse("2022-01-10T00:00:00Z"));
+        assertThat(txJan13.sum()).isEqualByComparingTo("100.00");
+        assertThat(txJan13.datetime()).isEqualTo(OffsetDateTime.parse("2022-01-13T15:00:00Z"));
+        assertThat(txJan13.limitSum()).isEqualByComparingTo("2000.00");
+        assertThat(txJan13.limitDatetime()).isEqualTo(OffsetDateTime.parse("2022-01-10T00:00:00Z"));
     }
 
     private void sendTransaction(String sum, String isoDatetime) {

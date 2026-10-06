@@ -1,8 +1,10 @@
 package by.mashnyuk.paymentServiceDemo.service.impl;
 
+import by.mashnyuk.paymentServiceDemo.mapper.TransactionMapper;
 import by.mashnyuk.paymentServiceDemo.model.Currency;
 import by.mashnyuk.paymentServiceDemo.model.Limit;
 import by.mashnyuk.paymentServiceDemo.model.Transaction;
+import by.mashnyuk.paymentServiceDemo.model.dto.response.ExceededTransactionResponseDto;
 import by.mashnyuk.paymentServiceDemo.repository.MonthlySpendingRepository;
 import by.mashnyuk.paymentServiceDemo.repository.TransactionRepository;
 import by.mashnyuk.paymentServiceDemo.service.ExchangeRateService;
@@ -31,6 +33,28 @@ public class TransactionServiceImpl implements TransactionService {
     private final ExchangeRateService exchangeRateService;
     private final LimitService limitService;
     private final ZoneId applicationZoneId;
+    private final TransactionMapper transactionMapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ExceededTransactionResponseDto> getExceededTransactions(String accountFrom) {
+        if (accountFrom == null || accountFrom.isBlank()) {
+            throw new IllegalArgumentException("Account must not be blank");
+        }
+        List<Transaction> exceededTransactions =
+                transactionRepository.findAllByAccountFromAndLimitExceededTrue(accountFrom);
+
+        return exceededTransactions.stream()
+                .map(tx -> {
+                    Limit actualLimit = limitService.getActualLimit(
+                            tx.getAccountFrom(),
+                            tx.getExpenseCategory(),
+                            tx.getDatetime()
+                    );
+                    return transactionMapper.toExceededDto(tx, actualLimit);
+                })
+                .toList();
+    }
 
     @Override
     @Transactional

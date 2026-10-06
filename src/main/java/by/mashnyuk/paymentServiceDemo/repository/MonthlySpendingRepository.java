@@ -13,14 +13,25 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-public interface MonthlySpendingRepository
-        extends JpaRepository<MonthlySpending, Long> {
+public interface MonthlySpendingRepository extends JpaRepository<MonthlySpending, Long> {
 
-    Optional<MonthlySpending>
-    findByAccountFromAndExpenseCategoryAndMonthStart(
+    Optional<MonthlySpending> findByAccountFromAndExpenseCategoryAndMonthStart(
             String accountFrom,
             ExpenseCategory expenseCategory,
             LocalDate monthStart
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT ms FROM MonthlySpending ms
+            WHERE ms.accountFrom = :account
+              AND ms.expenseCategory = :category
+              AND ms.monthStart = :monthStart
+            """)
+    Optional<MonthlySpending> findForUpdateByAccountAndCategoryAndMonth(
+            @Param("account") String account,
+            @Param("category") ExpenseCategory category,
+            @Param("monthStart") LocalDate monthStart
     );
 
     @Modifying
@@ -49,25 +60,11 @@ public interface MonthlySpendingRepository
                 month_start
             )
             DO NOTHING
-            """,
-            nativeQuery = true)
+            """, nativeQuery = true)
     int createIfAbsent(
             @Param("account") String account,
-            @Param("category") ExpenseCategory category,
+            @Param("category") String category,
             @Param("monthStart") LocalDate monthStart,
             @Param("limitSum") BigDecimal limitSum
-    );
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("""
-            SELECT ms FROM MonthlySpending ms
-            WHERE ms.accountFrom = :account
-              AND ms.expenseCategory = :category
-              AND ms.monthStart = :monthStart
-            """)
-    Optional<MonthlySpending> findForUpdateByAccountAndCategoryAndMonth(
-            @Param("account") String account,
-            @Param("category") ExpenseCategory category,
-            @Param("monthStart") LocalDate monthStart
     );
 }

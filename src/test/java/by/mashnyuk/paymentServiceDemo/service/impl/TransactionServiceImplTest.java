@@ -1,5 +1,6 @@
 package by.mashnyuk.paymentServiceDemo.service.impl;
 
+import by.mashnyuk.paymentServiceDemo.mapper.TransactionMapper;
 import by.mashnyuk.paymentServiceDemo.model.Currency;
 import by.mashnyuk.paymentServiceDemo.model.ExpenseCategory;
 import by.mashnyuk.paymentServiceDemo.model.Limit;
@@ -52,7 +53,7 @@ class TransactionServiceImplTest {
     private LimitService limitService;
 
     private TransactionServiceImpl transactionService;
-
+    @Mock private TransactionMapper transactionMapper;
     @BeforeEach
     void setUp() {
         transactionService = new TransactionServiceImpl(
@@ -60,7 +61,8 @@ class TransactionServiceImplTest {
                 monthlySpendingRepository,
                 exchangeRateService,
                 limitService,
-                APPLICATION_ZONE_ID
+                APPLICATION_ZONE_ID,
+                transactionMapper
         );
     }
 

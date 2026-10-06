@@ -1,6 +1,9 @@
 package by.mashnyuk.paymentServiceDemo;
 
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -8,6 +11,9 @@ import org.testcontainers.utility.DockerImageName;
 
 @ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @ServiceConnection
     static final PostgreSQLContainer<?> POSTGRES =
@@ -24,5 +30,17 @@ public abstract class AbstractIntegrationTest {
     static {
         POSTGRES.start();
         REDIS.start();
+    }
+
+    @AfterEach
+    void cleanDatabase() {
+        jdbcTemplate.execute("""
+        TRUNCATE TABLE
+            transactions,
+            limits,
+            monthly_spending,
+            exchange_rates
+        RESTART IDENTITY CASCADE
+        """);
     }
 }

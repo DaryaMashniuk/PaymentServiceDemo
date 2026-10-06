@@ -8,3 +8,8 @@ spring:
 
 app:
   zone-id: Europe/Minsk
+
+exchange-rate:
+  client:
+    base-url: ${EXCHANGE_RATE_BASE_URL:https://api.twelvedata.com}
+    api-key: ${EXCHANGE_RATE_API_KEY:test-api-key}

@@ -27,8 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-class MonthlySpendingRepositoryConcurrencyTest
-        extends AbstractIntegrationTest {
+class MonthlySpendingRepositoryConcurrencyTest extends AbstractIntegrationTest {
 
     @Autowired
     private MonthlySpendingRepository spendingRepository;
@@ -42,204 +41,125 @@ class MonthlySpendingRepositoryConcurrencyTest
     void tearDown() throws InterruptedException {
         if (executor != null) {
             executor.shutdownNow();
-            executor.awaitTermination(
-                    5,
-                    TimeUnit.SECONDS
-            );
+            executor.awaitTermination(5, TimeUnit.SECONDS);
         }
     }
 
     @Test
-    @DisplayName(
-            "parallel increments must be serialized by PostgreSQL"
-    )
-    void shouldSerializeParallelIncrements()
-            throws Exception {
-
+    @DisplayName("parallel increments must be serialized by PostgreSQL Pessimistic Lock")
+    void shouldSerializeParallelIncrements() throws Exception {
         String account = "0000000010";
-
-        LocalDate month =
-                LocalDate.of(2026, 1, 1);
+        LocalDate month = LocalDate.of(2026, 1, 1);
 
         runInNewTransaction(() ->
                 spendingRepository.save(
                         MonthlySpending.builder()
                                 .accountFrom(account)
-                                .expenseCategory(
-                                        ExpenseCategory.PRODUCT
-                                )
+                                .expenseCategory(ExpenseCategory.PRODUCT)
                                 .monthStart(month)
-                                .limitSum(
-                                        new BigDecimal("1000.00")
-                                )
-                                .spentUsd(
-                                        new BigDecimal("500.00")
-                                )
+                                .limitSum(new BigDecimal("1000.00"))
+                                .spentUsd(new BigDecimal("500.00"))
                                 .limitExceeded(false)
                                 .build()
                 )
         );
 
         int threadCount = 4;
-
-        executor =
-                Executors.newFixedThreadPool(
-                        threadCount
-                );
-
-        CountDownLatch start =
-                new CountDownLatch(1);
-
-        List<Future<?>> futures =
-                new ArrayList<>();
+        executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch start = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
 
         for (int i = 0; i < threadCount; i++) {
+            futures.add(executor.submit(() -> {
+                start.await();
 
-            futures.add(
-                    executor.submit(() -> {
+                runInNewTransaction(() -> {
+                    MonthlySpending spending = spendingRepository
+                            .findForUpdateByAccountAndCategoryAndMonth(
+                                    account, ExpenseCategory.PRODUCT, month
+                            ).orElseThrow();
 
-                        start.await();
+                    BigDecimal newSpent = spending.getSpentUsd().add(new BigDecimal("150.00"));
+                    spending.setSpentUsd(newSpent);
+                    spending.setLimitExceeded(newSpent.compareTo(spending.getLimitSum()) > 0);
 
-                        runInNewTransaction(() ->
-                                spendingRepository.incrementSpent(
-                                        account,
-                                        ExpenseCategory.PRODUCT.name(),
-                                        month,
-                                        new BigDecimal("150.00")
-                                )
-                        );
-
-                        return null;
-                    })
-            );
+                    spendingRepository.save(spending);
+                });
+                return null;
+            }));
         }
 
         start.countDown();
-
         for (Future<?> future : futures) {
-            future.get(
-                    15,
-                    TimeUnit.SECONDS
-            );
+            future.get(15, TimeUnit.SECONDS);
         }
 
-        MonthlySpending result =
-                spendingRepository
-                        .findByAccountFromAndExpenseCategoryAndMonthStart(
-                                account,
-                                ExpenseCategory.PRODUCT,
-                                month
-                        )
-                        .orElseThrow();
+        MonthlySpending result = spendingRepository
+                .findByAccountFromAndExpenseCategoryAndMonthStart(account, ExpenseCategory.PRODUCT, month)
+                .orElseThrow();
 
-        assertThat(result.getSpentUsd())
-                .isEqualByComparingTo("1100.00");
-
-        assertThat(result.getLimitExceeded())
-                .isTrue();
+        assertThat(result.getSpentUsd()).isEqualByComparingTo("1100.00");
+        assertThat(result.getLimitExceeded()).isTrue();
     }
 
     @Test
-    @DisplayName(
-            "parallel increments must not lose updates"
-    )
-    void shouldNotLoseUpdates()
-            throws Exception {
-
+    @DisplayName("parallel increments must not lose updates")
+    void shouldNotLoseUpdates() throws Exception {
         String account = "0000000011";
-
-        LocalDate month =
-                LocalDate.of(2026, 1, 1);
-
+        LocalDate month = LocalDate.of(2026, 1, 1);
         int threadCount = 10;
 
         runInNewTransaction(() ->
                 spendingRepository.save(
                         MonthlySpending.builder()
                                 .accountFrom(account)
-                                .expenseCategory(
-                                        ExpenseCategory.SERVICE
-                                )
+                                .expenseCategory(ExpenseCategory.SERVICE)
                                 .monthStart(month)
-                                .limitSum(
-                                        new BigDecimal("10000.00")
-                                )
-                                .spentUsd(
-                                        BigDecimal.ZERO
-                                )
+                                .limitSum(new BigDecimal("10000.00"))
+                                .spentUsd(BigDecimal.ZERO)
                                 .limitExceeded(false)
                                 .build()
                 )
         );
 
-        executor =
-                Executors.newFixedThreadPool(
-                        threadCount
-                );
-
-        CountDownLatch start =
-                new CountDownLatch(1);
-
-        List<Future<?>> futures =
-                new ArrayList<>();
+        executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch start = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
 
         for (int i = 0; i < threadCount; i++) {
+            futures.add(executor.submit(() -> {
+                start.await();
+                runInNewTransaction(() -> {
+                    MonthlySpending spending = spendingRepository
+                            .findForUpdateByAccountAndCategoryAndMonth(
+                                    account, ExpenseCategory.SERVICE, month
+                            ).orElseThrow();
 
-            futures.add(
-                    executor.submit(() -> {
+                    BigDecimal newSpent = spending.getSpentUsd().add(new BigDecimal("100.00"));
+                    spending.setSpentUsd(newSpent);
+                    spending.setLimitExceeded(newSpent.compareTo(spending.getLimitSum()) > 0);
 
-                        start.await();
-
-                        runInNewTransaction(() ->
-                                spendingRepository.incrementSpent(
-                                        account,
-                                        ExpenseCategory.SERVICE.name(),
-                                        month,
-                                        new BigDecimal("100.00")
-                                )
-                        );
-
-                        return null;
-                    })
-            );
+                    spendingRepository.save(spending);
+                });
+                return null;
+            }));
         }
 
         start.countDown();
-
         for (Future<?> future : futures) {
-            future.get(
-                    15,
-                    TimeUnit.SECONDS
-            );
+            future.get(15, TimeUnit.SECONDS);
         }
 
-        MonthlySpending result =
-                spendingRepository
-                        .findByAccountFromAndExpenseCategoryAndMonthStart(
-                                account,
-                                ExpenseCategory.SERVICE,
-                                month
-                        )
-                        .orElseThrow();
+        MonthlySpending result = spendingRepository
+                .findByAccountFromAndExpenseCategoryAndMonthStart(account, ExpenseCategory.SERVICE, month)
+                .orElseThrow();
 
-        assertThat(result.getSpentUsd())
-                .isEqualByComparingTo("1000.00");
-
-        assertThat(result.getLimitExceeded())
-                .isFalse();
+        assertThat(result.getSpentUsd()).isEqualByComparingTo("1000.00");
+        assertThat(result.getLimitExceeded()).isFalse();
     }
 
-    private void runInNewTransaction(
-            Runnable action
-    ) {
-
-        TransactionTemplate template =
-                new TransactionTemplate(
-                        transactionManager
-                );
-
-        template.executeWithoutResult(
-                status -> action.run()
-        );
+    private void runInNewTransaction(Runnable action) {
+        TransactionTemplate template = new TransactionTemplate(transactionManager);
+        template.executeWithoutResult(status -> action.run());
     }
 }

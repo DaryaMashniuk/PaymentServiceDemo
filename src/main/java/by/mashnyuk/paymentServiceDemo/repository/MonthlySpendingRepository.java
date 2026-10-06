@@ -2,7 +2,9 @@ package by.mashnyuk.paymentServiceDemo.repository;
 
 import by.mashnyuk.paymentServiceDemo.model.ExpenseCategory;
 import by.mashnyuk.paymentServiceDemo.model.MonthlySpending;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,25 +58,16 @@ public interface MonthlySpendingRepository
             @Param("limitSum") BigDecimal limitSum
     );
 
-    @Modifying(
-            clearAutomatically = true,
-            flushAutomatically = true
-    )
-    @Query(value = """
-            UPDATE monthly_spending
-               SET spent_usd = spent_usd + :amount,
-                   limit_exceeded =
-                       (spent_usd + :amount) > limit_sum,
-                   version = version + 1
-             WHERE account_from = :account
-               AND expense_category = :category
-               AND month_start = :monthStart
-            """,
-            nativeQuery = true)
-    int incrementSpent(
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT ms FROM MonthlySpending ms
+            WHERE ms.accountFrom = :account
+              AND ms.expenseCategory = :category
+              AND ms.monthStart = :monthStart
+            """)
+    Optional<MonthlySpending> findForUpdateByAccountAndCategoryAndMonth(
             @Param("account") String account,
-            @Param("category") String category,
-            @Param("monthStart") LocalDate monthStart,
-            @Param("amount") BigDecimal amount
+            @Param("category") ExpenseCategory category,
+            @Param("monthStart") LocalDate monthStart
     );
 }

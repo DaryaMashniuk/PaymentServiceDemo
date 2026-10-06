@@ -12,7 +12,7 @@ RUN ./mvnw dependency:go-offline -B
 
 COPY src src
 
-RUN ./mvnw clean verify -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 
 FROM eclipse-temurin:21-jre
@@ -24,9 +24,7 @@ RUN useradd \
         --uid 1001 \
         spring
 
-COPY --from=builder \
-     /app/target/*.jar \
-     app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 RUN chown spring:spring app.jar
 
@@ -34,9 +32,4 @@ USER spring
 
 EXPOSE 8080
 
-ENTRYPOINT [
-    "java",
-    "-XX:+UseContainerSupport",
-    "-jar",
-    "app.jar"
-]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-jar", "app.jar"]

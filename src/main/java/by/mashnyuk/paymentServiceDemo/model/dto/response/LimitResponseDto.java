@@ -2,32 +2,27 @@ package by.mashnyuk.paymentServiceDemo.model.dto.response;
 
 import by.mashnyuk.paymentServiceDemo.model.ExpenseCategory;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class LimitResponseDto {
+public record LimitResponseDto(
 
-    @JsonProperty("account_from")
-    private String accountFrom;
+        @JsonProperty("account_from")
+        String accountFrom,
 
-    @JsonProperty("limit_sum")
-    private BigDecimal limitSum;
+        @JsonProperty("limit_sum")
+        BigDecimal limitSum,
 
-    @JsonProperty("limit_datetime")
-    private OffsetDateTime limitDatetime;
+        @JsonProperty("limit_datetime")
+        OffsetDateTime limitDatetime,
 
-    @JsonProperty("limit_currency_shortname")
-    private String limitCurrencyShortname;
+        @JsonProperty("limit_currency_shortname")
+        String limitCurrencyShortname,
 
-    @JsonProperty("expense_category")
-    private ExpenseCategory expenseCategory;
-}
+        @JsonProperty("expense_category")
+        ExpenseCategory expenseCategory
+
+) {}

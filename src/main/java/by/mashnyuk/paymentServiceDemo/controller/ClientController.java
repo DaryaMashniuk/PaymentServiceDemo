@@ -41,11 +41,11 @@ public class ClientController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Establish a new monthly spending limit")
     public LimitResponseDto setLimit(@Valid @RequestBody LimitRequestDto requestDto) {
-        log.info("REST: Set new limit for account {}", requestDto.getAccountFrom());
+        log.info("REST: Set new limit for account {}", requestDto.accountFrom());
         Limit limit = limitService.setLimit(
-                requestDto.getAccountFrom(),
-                requestDto.getLimitSum(),
-                requestDto.getExpenseCategory()
+                requestDto.accountFrom(),
+                requestDto.limitSum(),
+                requestDto.expenseCategory()
         );
         return limitMapper.toDto(limit);
     }

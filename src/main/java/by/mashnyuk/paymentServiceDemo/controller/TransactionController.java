@@ -30,7 +30,7 @@ public class TransactionController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Receive and process a new transaction")
     public void processTransaction(@Valid @RequestBody TransactionRequestDto requestDto) {
-        log.info("REST: Received transaction for account {}", requestDto.getAccountFrom());
+        log.info("REST: Received transaction for account {}", requestDto.accountFrom());
         Transaction entity = transactionMapper.toEntity(requestDto);
         transactionService.processTransaction(entity);
     }

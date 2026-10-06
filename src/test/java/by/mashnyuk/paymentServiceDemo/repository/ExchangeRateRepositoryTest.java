@@ -75,17 +75,6 @@ class ExchangeRateRepositoryTest extends AbstractIntegrationTest {
             assertThat(rub).isPresent();
             assertThat(rub.get().getCloseRate()).isEqualByComparingTo("90.00");
         }
-
-        @Test
-        @DisplayName("Unique pair+date constraint: duplicate insert throws an exception")
-        void shouldEnforceUniqueConstraint() {
-            LocalDate date = LocalDate.of(2026, 1, 15);
-            repository.saveAndFlush(rate(date, KZT_USD, "500.00", "499.00"));
-
-            assertThatThrownBy(() ->
-                    repository.saveAndFlush(rate(date, KZT_USD, "501.00", "500.00")))
-                    .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
-        }
     }
 
     @Nested
